@@ -1,39 +1,39 @@
 // delclare vars
 var questions = [{
-    q: "Which of these is not a Beatle?",
-    ans1: "John",
-    ans2: "Paul",
-    ans3: "George",
-    correct: "Bingo"
-},
-{
-    q: "What is Ringo's real name?",
-    ans1: "Ricky Starr",
-    ans2: "Richard Starnes",
-    ans3: "Richard Starr",
-    correct: "Richard Starkey"
-},
-{
-    q: "Which Beatles album sold the most copies?",
-    ans1: "Sgt Pepper's Lonely Hearts Club Band",
-    ans2: "Please Please Me",
-    ans3: "Abbey Road",
-    correct: "The White Album (The Beatles)"
-},
-{
-    q: "Who did Paul McCartney write the song Hey Jude for?",
-    ans1: "His son",
-    ans2: "A close family friend",
-    ans3: "John Lennon",
-    correct: "John Lennon's son"
-},
-{
-    q: "What was the only song to appear on a Beatles album that John recorded by himself?",
-    ans1: "Let it Be",
-    ans2: "Imagine",
-    ans3: "Hey Bulldog",
-    correct: "Julia"
-},
+        q: "Which of these is not a Beatle?",
+        ans1: "John",
+        ans2: "Paul",
+        ans3: "George",
+        correct: "Bingo"
+    },
+    {
+        q: "What is Ringo's real name?",
+        ans1: "Ricky Starr",
+        ans2: "Richard Starnes",
+        ans3: "Richard Starr",
+        correct: "Richard Starkey"
+    },
+    {
+        q: "Which Beatles album sold the most copies?",
+        ans1: "Sgt Pepper's Lonely Hearts Club Band",
+        ans2: "Please Please Me",
+        ans3: "Abbey Road",
+        correct: "The White Album (The Beatles)"
+    },
+    {
+        q: "Who did Paul McCartney write the song Hey Jude for?",
+        ans1: "His son",
+        ans2: "A close family friend",
+        ans3: "John Lennon",
+        correct: "John Lennon's son"
+    },
+    {
+        q: "What was the only song to appear on a Beatles album that John recorded by himself?",
+        ans1: "Let it Be",
+        ans2: "Imagine",
+        ans3: "Hey Bulldog",
+        correct: "Julia"
+    },
 ];
 var count = 0;
 var answerChoices = ["ans1", "ans2", "ans3", "correct"];
@@ -42,6 +42,9 @@ var correct = 0;
 var incorrect = 0;
 var startInterval;
 var delay;
+var timeCount = 5;
+var timer;
+var gameStarted = false;
 
 // create a function to arrange the answers randomly but not repeat answers
 function setRandomAnswers() {
@@ -55,6 +58,13 @@ function setRandomAnswers() {
 
 // function to display a question and its answers
 function displayQuestion() {
+    if (count === questions.length) {
+        // if count === questions.length show end screen with score
+        // run endgame
+        endGame(); 
+        // count = 0;
+    }
+    else {
     $("#win").text("YOU'RE RIGHT WOO!!!");
     $("#win").hide();
     $("#lose").text("WRONG!");
@@ -69,27 +79,42 @@ function displayQuestion() {
     $("#ans3").attr("value", randomizedAnswerSet[2]);
     $("#ans4").text(questions[count][randomizedAnswerSet[3]]);
     $("#ans4").attr("value", randomizedAnswerSet[3]);
+    timeCount = 5;
+    $("#timer").text(timeCount);
+    clearInterval(timer);
+    timer = setInterval(timerFunction, 1000);
     count++;
-    if (count === questions.length) {
-        // run endgame 
-        count = 0;
+    }
+}
+
+// timer function for individual questions
+function timerFunction() {
+    timeCount--;
+    $("#timer").text(timeCount);
+    // if timer runs out show time ran out screen - after two seconds continue game
+    if (timeCount === 0) {
+        clearInterval(timer);
+        clearInterval(startInterval);
+        $("#game").hide();
+        $("#lose").show();
+        delay = setTimeout(questionCycle, 2000);
     }
 }
 
 // create a function that will cycle through questions
 function questionCycle() {
+    gameStarted = true;
     $("#game").show();
     $("#start").text("Start Over");
     displayQuestion();
-    startInterval = setInterval(displayQuestion, 5000);   
+    startInterval = setInterval(displayQuestion, 5000);
 }
 
-// need to show a timer
-// if timer runs out show time ran out screen - after two seconds continue game
-$(".answerButton").click(function() {
+$(".answerButton").click(function () {
     // if user clicks correct answer show win screen - after two seconds continue game
     if ($(this).attr("value") === "correct") {
         correct++;
+        clearInterval(timer);
         clearInterval(startInterval);
         $("#game").hide();
         $("#win").show();
@@ -98,6 +123,7 @@ $(".answerButton").click(function() {
     // if user chooses incorrectly show show inccorect guess screen - after two seconds contnue game
     else {
         incorrect++;
+        clearInterval(timer);
         clearInterval(startInterval);
         $("#game").hide();
         $("#lose").show();
@@ -106,10 +132,40 @@ $(".answerButton").click(function() {
 
 })
 
+// end game function
+function endGame() {
+    clearInterval(timer);
+    clearInterval(startInterval);
+    var percent = (correct / 5) * 100;
+    $("#game").hide();
+    $("#win").hide();
+    $("#lose").hide();
+    $("#end-game").html(`
+    <h1>Your Score:</h1>
+    <p> ${percent} </p>
+    <p> You got ${correct} questions right and ${incorrect} questions wrong.`);
+    $("#end-game").show();
+}
 
-// if count === questions.length show end screen with score
+// start over 
+function startOver() {
+    gameStarted = false;
+    $("#end-game").hide();
+    count = 0;
+    correct = 0;
+    incorrect = 0;
+    clearInterval(timer);
+    clearInterval(startInterval);
+    timeCount = 5;
+    questionCycle();
+}
 
 // create a function that will be passed in once "start game" is clicked
-$("#start").click(questionCycle);
-
-
+$("#start").click(function() {
+    if (gameStarted) {
+        startOver();
+    }
+    else {
+        questionCycle();
+    }
+});
