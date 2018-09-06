@@ -1,0 +1,31 @@
+body {
+    text-align: center;
+    background-color: #F0C94A;
+}
+
+#header {
+    position: relative;
+    top: -20px;
+    height: 200px;
+}
+
+#background-image {
+    position: absolute;
+    bottom: 0px;
+    left: 20%;
+    z-index: -10;
+}
+
+#all {
+    margin-top: -40px;
+}
+
+#game {
+    text-align: center;
+    z-index: 1;
+}
+
+#start {
+    position: relative;
+    margin-bottom: 20px;
+}
